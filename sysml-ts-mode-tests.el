@@ -81,5 +81,51 @@
     (should (eq (get-text-property (match-beginning 0) 'face)
                 'font-lock-doc-face))))
 
+(ert-deftest sysml-ts-mode-indent-package-body ()
+  "Package body members indent by `sysml-ts-indent-offset'."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "package P {\npart myPart;\n}\n")
+    (sysml-ts-mode)
+    (indent-region (point-min) (point-max))
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (= (current-indentation) sysml-ts-indent-offset))))
+
+(ert-deftest sysml-ts-mode-indent-closing-brace ()
+  "Closing brace aligns with the opening construct."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "package P {\npart myPart;\n}\n")
+    (sysml-ts-mode)
+    (indent-region (point-min) (point-max))
+    (goto-char (point-min))
+    (forward-line 2)
+    (should (= (current-indentation) 0))))
+
+(ert-deftest sysml-ts-mode-indent-nested ()
+  "Nested blocks indent cumulatively."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "package Outer {\npackage Inner {\npart x;\n}\n}\n")
+    (sysml-ts-mode)
+    (indent-region (point-min) (point-max))
+    (goto-char (point-min))
+    (forward-line 2)
+    (should (= (current-indentation) (* 2 sysml-ts-indent-offset)))
+    (forward-line 1)
+    (should (= (current-indentation) sysml-ts-indent-offset))))
+
+(ert-deftest sysml-ts-mode-indent-requirement-body ()
+  "Requirement body members indent correctly."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "requirement flashlightSpec {\nrequirement illumination;\n}\n")
+    (sysml-ts-mode)
+    (indent-region (point-min) (point-max))
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (= (current-indentation) sysml-ts-indent-offset))))
+
 (provide 'sysml-ts-mode-tests)
 ;;; sysml-ts-mode-tests.el ends here

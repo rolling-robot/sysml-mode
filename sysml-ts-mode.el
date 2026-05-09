@@ -93,6 +93,34 @@
    `(,(apply #'vector sysml-ts-mode--keywords) @font-lock-keyword-face))
   "Font-lock settings for `sysml-ts-mode'.")
 
+;;; Indentation
+
+(defcustom sysml-ts-indent-offset 4
+  "Number of spaces for each indentation level in `sysml-ts-mode'."
+  :type 'integer
+  :safe #'integerp
+  :group 'sysml)
+
+(defvar sysml-ts-mode--indent-rules
+  `((sysml
+     ;; top-level: no indent
+     ((parent-is "source_file") column-0 0)
+
+     ;; closing brace: align with the line that opened the block
+     ((node-is "}") parent-bol 0)
+
+     ;; block bodies: indent children by one level
+     ((parent-is "package_body")     parent-bol ,sysml-ts-indent-offset)
+     ((parent-is "structural_body")  parent-bol ,sysml-ts-indent-offset)
+     ((parent-is "action_body")      parent-bol ,sysml-ts-indent-offset)
+     ((parent-is "requirement_body") parent-bol ,sysml-ts-indent-offset)
+     ((parent-is "usage_body")       parent-bol ,sysml-ts-indent-offset)
+     ((parent-is "state_body")       parent-bol ,sysml-ts-indent-offset)
+
+     ;; blank lines and multi-line token interiors: inherit parent column
+     (no-node parent-bol 0)))
+  "Indentation rules for `sysml-ts-mode'.")
+
 ;;; Major mode
 
 ;;;###autoload
@@ -115,6 +143,7 @@ To install the grammar:
     (treesit-parser-create 'sysml)
     (setq-local treesit-font-lock-settings sysml-ts-mode--font-lock-settings)
     (setq-local treesit-font-lock-feature-list sysml-ts-mode--font-lock-feature-list)
+    (setq-local treesit-simple-indent-rules sysml-ts-mode--indent-rules)
     (treesit-major-mode-setup)))
 
 ;;;###autoload
