@@ -43,5 +43,43 @@
       (should (eq (get-text-property (match-beginning 0) 'face)
                   'font-lock-keyword-face)))))
 
+(ert-deftest sysml-ts-mode-line-comment-face ()
+  "Line comments receive `font-lock-comment-face'."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "package P {\n  // ran with 2025-09 release on 2025-10-20\n}\n")
+    (sysml-ts-mode)
+    (font-lock-ensure)
+    (goto-char (point-min))
+    (search-forward "ran with")
+    (should (eq (get-text-property (match-beginning 0) 'face)
+                'font-lock-comment-face))))
+
+(ert-deftest sysml-ts-mode-block-comment-face ()
+  "Block comments receive `font-lock-comment-face'."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "package P {\n  /* simple flashlight model */\n}\n")
+    (sysml-ts-mode)
+    (font-lock-ensure)
+    (goto-char (point-min))
+    (search-forward "simple flashlight")
+    (should (eq (get-text-property (match-beginning 0) 'face)
+                'font-lock-comment-face))))
+
+(ert-deftest sysml-ts-mode-doc-face ()
+  "Doc comment body receives `font-lock-doc-face'."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "requirement R {\n"
+            "  doc /* The flashlight field of view shall be 0 - 20 degrees.*/\n"
+            "}\n")
+    (sysml-ts-mode)
+    (font-lock-ensure)
+    (goto-char (point-min))
+    (search-forward "field of view")
+    (should (eq (get-text-property (match-beginning 0) 'face)
+                'font-lock-doc-face))))
+
 (provide 'sysml-ts-mode-tests)
 ;;; sysml-ts-mode-tests.el ends here

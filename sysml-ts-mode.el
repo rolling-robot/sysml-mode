@@ -84,6 +84,11 @@
 (defvar sysml-ts-mode--font-lock-settings
   (treesit-font-lock-rules
    :language 'sysml
+   :feature 'comment
+   '((comment) @font-lock-comment-face
+     (block_comment_body) @font-lock-doc-face)
+
+   :language 'sysml
    :feature 'keyword
    `(,(apply #'vector sysml-ts-mode--keywords) @font-lock-keyword-face))
   "Font-lock settings for `sysml-ts-mode'.")
