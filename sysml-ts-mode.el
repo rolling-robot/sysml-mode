@@ -49,6 +49,45 @@
     st)
   "Syntax table for `sysml-ts-mode'.")
 
+;;; Font-lock
+
+(defvar sysml-ts-mode--font-lock-feature-list
+  '((comment)
+    (keyword)
+    ()
+    ())
+  "Feature list for `sysml-ts-mode'.")
+
+;; "enumeration"/"readonly" excluded — not anonymous tokens in the grammar.
+;; "feature" excluded — no corresponding anonymous token (feature_usage has none).
+(defconst sysml-ts-mode--keywords
+  '("about" "abstract" "accept" "action" "actor" "after" "alias" "all"
+    "allocate" "allocation" "analysis" "and" "as" "assert" "assign"
+    "assume" "at" "attribute" "bind" "by" "calc" "case" "comment"
+    "concern" "connect" "connection" "constraint" "constant" "crosses"
+    "decide" "def" "default" "defined" "dependency" "derived" "do" "doc"
+    "done" "else" "end" "enum" "entry" "event" "exhibit" "exit" "expose"
+    "filter" "first" "flow" "for" "fork" "frame" "from" "hastype" "id"
+    "if" "implies" "import" "in" "include" "individual" "inout"
+    "interface" "istype" "item" "join" "language" "library" "locale"
+    "loop" "merge" "message" "meta" "metadata" "new" "nonunique" "not"
+    "objective" "occurrence" "of" "or" "ordered" "out" "package"
+    "parallel" "part" "perform" "port" "private" "protected" "public"
+    "ref" "redefines" "references" "render" "rendering" "rep" "require"
+    "requirement" "return" "satisfy" "send" "snapshot" "specializes"
+    "stakeholder" "standard" "state" "stream" "subsets" "subject"
+    "succession" "terminate" "then" "timeslice" "to" "transition" "true"
+    "false" "until" "use" "variant" "variation" "verification" "verify"
+    "via" "view" "viewpoint" "when" "while" "xor")
+  "SysML anonymous keyword tokens for font-lock.")
+
+(defvar sysml-ts-mode--font-lock-settings
+  (treesit-font-lock-rules
+   :language 'sysml
+   :feature 'keyword
+   `(,(apply #'vector sysml-ts-mode--keywords) @font-lock-keyword-face))
+  "Font-lock settings for `sysml-ts-mode'.")
+
 ;;; Major mode
 
 ;;;###autoload
@@ -69,6 +108,8 @@ To install the grammar:
 
   (when (treesit-ready-p 'sysml)
     (treesit-parser-create 'sysml)
+    (setq-local treesit-font-lock-settings sysml-ts-mode--font-lock-settings)
+    (setq-local treesit-font-lock-feature-list sysml-ts-mode--font-lock-feature-list)
     (treesit-major-mode-setup)))
 
 ;;;###autoload
