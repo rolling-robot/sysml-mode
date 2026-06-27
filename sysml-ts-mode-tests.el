@@ -81,6 +81,24 @@
     (should (eq (get-text-property (match-beginning 0) 'face)
                 'font-lock-doc-face))))
 
+(ert-deftest sysml-ts-mode-definition-faces ()
+  "Definition names receive appropriate faces."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "package MyPkg {\n"
+            "  part def MyPart {}\n"
+            "  attribute def MyAttr {}\n"
+            "}\n")
+    (sysml-ts-mode)
+    (font-lock-ensure)
+    (goto-char (point-min))
+    (search-forward "MyPkg")
+    (should (eq (get-text-property (match-beginning 0) 'face) 'font-lock-type-face))
+    (search-forward "MyPart")
+    (should (eq (get-text-property (match-beginning 0) 'face) 'font-lock-function-name-face))
+    (search-forward "MyAttr")
+    (should (eq (get-text-property (match-beginning 0) 'face) 'font-lock-variable-name-face))))
+
 (ert-deftest sysml-ts-mode-indent-package-body ()
   "Package body members indent by `sysml-ts-indent-offset'."
   (skip-unless (treesit-ready-p 'sysml t))

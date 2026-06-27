@@ -52,7 +52,7 @@
 ;;; Font-lock
 
 (defvar sysml-ts-mode--font-lock-feature-list
-  '((comment)
+  '((comment definition)
     (keyword)
     ()
     ())
@@ -90,7 +90,30 @@
 
    :language 'sysml
    :feature 'keyword
-   `(,(apply #'vector sysml-ts-mode--keywords) @font-lock-keyword-face))
+   `(,(apply #'vector sysml-ts-mode--keywords) @font-lock-keyword-face)
+
+   :language 'sysml
+   :feature 'definition
+   '((package_definition    (identification (name (identifier) @font-lock-type-face)))
+     (library_package       (identification (name (identifier) @font-lock-type-face)))
+     (part_definition       (identification (name (identifier) @font-lock-function-name-face)))
+     (item_definition       (identification (name (identifier) @font-lock-function-name-face)))
+     (port_definition       (identification (name (identifier) @font-lock-function-name-face)))
+     (action_definition     (identification (name (identifier) @font-lock-function-name-face)))
+     (state_definition      (identification (name (identifier) @font-lock-function-name-face)))
+     (constraint_definition (identification (name (identifier) @font-lock-function-name-face)))
+     (requirement_definition (identification (name (identifier) @font-lock-function-name-face)))
+     (connection_definition (identification (name (identifier) @font-lock-function-name-face)))
+     (interface_definition  (identification (name (identifier) @font-lock-function-name-face)))
+     (allocation_definition (identification (name (identifier) @font-lock-function-name-face)))
+     (flow_definition       (identification (name (identifier) @font-lock-function-name-face)))
+     (metadata_definition   (identification (name (identifier) @font-lock-function-name-face)))
+     (use_case_definition   (identification (name (identifier) @font-lock-function-name-face)))
+     (calc_definition       (identification (name (identifier) @font-lock-function-name-face)))
+     (view_definition       (identification (name (identifier) @font-lock-function-name-face)))
+     (viewpoint_definition  (identification (name (identifier) @font-lock-function-name-face)))
+     (rendering_definition  (identification (name (identifier) @font-lock-function-name-face)))
+     (attribute_definition  (identification (name (identifier) @font-lock-variable-name-face)))))
   "Font-lock settings for `sysml-ts-mode'.")
 
 ;;; Indentation
