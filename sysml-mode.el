@@ -22,6 +22,7 @@
 ;;; Code:
 
 (require 'treesit)
+(require 'flymake)
 
 ;;; Customization
 
@@ -127,6 +128,7 @@
      ((parent-is "source_file") column-0 0)
      ((node-is "}") parent-bol 0)
      ((parent-is "package_body")     parent-bol ,sysml-indent-offset)
+     ((parent-is "definition_body") parent-bol ,sysml-indent-offset)
      ((parent-is "structural_body")  parent-bol ,sysml-indent-offset)
      ((parent-is "action_body")      parent-bol ,sysml-indent-offset)
      ((parent-is "requirement_body") parent-bol ,sysml-indent-offset)
@@ -134,6 +136,25 @@
      ((parent-is "state_body")       parent-bol ,sysml-indent-offset)
      (no-node parent-bol 0)))
   "Indentation rules for `sysml-mode'.")
+
+;;; Flymake
+
+(defun sysml-mode--flymake-backend (report-fn &rest _)
+  "Flymake backend reporting tree-sitter ERROR nodes as diagnostics."
+  (let ((root (treesit-buffer-root-node 'sysml))
+        (diags nil))
+    (treesit-search-subtree
+     root
+     (lambda (node)
+       (when (string= (treesit-node-type node) "ERROR")
+         (push (flymake-make-diagnostic
+                (current-buffer)
+                (treesit-node-start node)
+                (treesit-node-end node)
+                :error "Syntax error")
+               diags))
+       nil))
+    (funcall report-fn diags)))
 
 ;;; Major mode
 
@@ -158,7 +179,8 @@ To install the grammar:
     (setq-local treesit-font-lock-settings sysml-mode--font-lock-settings)
     (setq-local treesit-font-lock-feature-list sysml-mode--font-lock-feature-list)
     (setq-local treesit-simple-indent-rules sysml-mode--indent-rules)
-    (treesit-major-mode-setup)))
+    (treesit-major-mode-setup)
+    (add-hook 'flymake-diagnostic-functions #'sysml-mode--flymake-backend nil t)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.sysml\\'" . sysml-mode))

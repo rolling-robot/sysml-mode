@@ -134,6 +134,17 @@
     (forward-line 1)
     (should (= (current-indentation) sysml-indent-offset))))
 
+(ert-deftest sysml-mode-indent-definition-body ()
+  "Definition body members indent correctly."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "part def Flashlight {\npart battery : Battery;\n}\n")
+    (sysml-mode)
+    (indent-region (point-min) (point-max))
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (= (current-indentation) sysml-indent-offset))))
+
 (ert-deftest sysml-mode-indent-requirement-body ()
   "Requirement body members indent correctly."
   (skip-unless (treesit-ready-p 'sysml t))
@@ -144,6 +155,27 @@
     (goto-char (point-min))
     (forward-line 1)
     (should (= (current-indentation) sysml-indent-offset))))
+
+(ert-deftest sysml-mode-flymake-syntax-error ()
+  "Flymake backend reports a diagnostic for an ERROR node."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "} garbage {")
+    (sysml-mode)
+    (let (reported)
+      (sysml-mode--flymake-backend (lambda (diags &rest _) (setq reported diags)))
+      (should (> (length reported) 0))
+      (should (eq (flymake-diagnostic-type (car reported)) :error)))))
+
+(ert-deftest sysml-mode-flymake-no-errors-on-valid ()
+  "Flymake backend reports no diagnostics for valid SysML."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "package P {\n  part def MyPart {}\n}\n")
+    (sysml-mode)
+    (let (reported)
+      (sysml-mode--flymake-backend (lambda (diags &rest _) (setq reported diags)))
+      (should (null reported)))))
 
 (provide 'sysml-mode-tests)
 ;;; sysml-mode-tests.el ends here
