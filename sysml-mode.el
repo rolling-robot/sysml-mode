@@ -1,12 +1,12 @@
-;;; sysml-ts-mode.el --- Major mode for SysML v2 using tree-sitter  -*- lexical-binding: t; -*-
+;;; sysml-mode.el --- Major mode for SysML v2 using tree-sitter  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2025 sysml-ts-mode contributors
+;; Copyright (C) 2026 sysml-mode contributors
 
 ;; Author: Petr Mukhachev
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "30.1"))
 ;; Keywords: languages
-;; URL: https://gitlab.com/nomograph/sysml-ts-mode
+;; URL: https://gitlab.com/nomograph/sysml-mode
 
 ;;; Commentary:
 
@@ -28,7 +28,7 @@
 (defgroup sysml nil
   "Support for the SysML v2 modelling language."
   :group 'languages
-  :prefix "sysml-ts-")
+  :prefix "sysml-")
 
 ;;; Grammar registration
 
@@ -38,29 +38,27 @@
 
 ;;; Syntax table
 
-(defvar sysml-ts-mode--syntax-table
+(defconst sysml-mode--syntax-table
   (let ((st (make-syntax-table)))
-    ;; // line comments and /* */ block comments
     (modify-syntax-entry ?/ ". 124b" st)
     (modify-syntax-entry ?* ". 23" st)
     (modify-syntax-entry ?\n "> b" st)
-    ;; _ is a word constituent (identifiers like My_Part)
     (modify-syntax-entry ?_ "w" st)
     st)
-  "Syntax table for `sysml-ts-mode'.")
+  "Syntax table for `sysml-mode'.")
 
 ;;; Font-lock
 
-(defvar sysml-ts-mode--font-lock-feature-list
+(defconst sysml-mode--font-lock-feature-list
   '((comment definition)
     (keyword)
     ()
     ())
-  "Feature list for `sysml-ts-mode'.")
+  "Feature list for `sysml-mode'.")
 
 ;; "enumeration"/"readonly" excluded — not anonymous tokens in the grammar.
 ;; "feature" excluded — no corresponding anonymous token (feature_usage has none).
-(defconst sysml-ts-mode--keywords
+(defconst sysml-mode--keywords
   '("about" "abstract" "accept" "action" "actor" "after" "alias" "all"
     "allocate" "allocation" "analysis" "and" "as" "assert" "assign"
     "assume" "at" "attribute" "bind" "by" "calc" "case" "comment"
@@ -81,7 +79,7 @@
     "via" "view" "viewpoint" "when" "while" "xor")
   "SysML anonymous keyword tokens for font-lock.")
 
-(defvar sysml-ts-mode--font-lock-settings
+(defconst sysml-mode--font-lock-settings
   (treesit-font-lock-rules
    :language 'sysml
    :feature 'comment
@@ -90,7 +88,7 @@
 
    :language 'sysml
    :feature 'keyword
-   `(,(apply #'vector sysml-ts-mode--keywords) @font-lock-keyword-face)
+   `(,(apply #'vector sysml-mode--keywords) @font-lock-keyword-face)
 
    :language 'sysml
    :feature 'definition
@@ -114,47 +112,40 @@
      (viewpoint_definition  (identification (name (identifier) @font-lock-function-name-face)))
      (rendering_definition  (identification (name (identifier) @font-lock-function-name-face)))
      (attribute_definition  (identification (name (identifier) @font-lock-variable-name-face)))))
-  "Font-lock settings for `sysml-ts-mode'.")
+  "Font-lock settings for `sysml-mode'.")
 
 ;;; Indentation
 
-(defcustom sysml-ts-indent-offset 4
-  "Number of spaces for each indentation level in `sysml-ts-mode'."
-  :type 'integer
-  :safe #'integerp
+(defcustom sysml-indent-offset 4
+  "Number of spaces for each indentation level in `sysml-mode'."
+  :type 'natnum
+  :safe #'natnump
   :group 'sysml)
 
-(defvar sysml-ts-mode--indent-rules
+(defconst sysml-mode--indent-rules
   `((sysml
-     ;; top-level: no indent
      ((parent-is "source_file") column-0 0)
-
-     ;; closing brace: align with the line that opened the block
      ((node-is "}") parent-bol 0)
-
-     ;; block bodies: indent children by one level
-     ((parent-is "package_body")     parent-bol ,sysml-ts-indent-offset)
-     ((parent-is "structural_body")  parent-bol ,sysml-ts-indent-offset)
-     ((parent-is "action_body")      parent-bol ,sysml-ts-indent-offset)
-     ((parent-is "requirement_body") parent-bol ,sysml-ts-indent-offset)
-     ((parent-is "usage_body")       parent-bol ,sysml-ts-indent-offset)
-     ((parent-is "state_body")       parent-bol ,sysml-ts-indent-offset)
-
-     ;; blank lines and multi-line token interiors: inherit parent column
+     ((parent-is "package_body")     parent-bol ,sysml-indent-offset)
+     ((parent-is "structural_body")  parent-bol ,sysml-indent-offset)
+     ((parent-is "action_body")      parent-bol ,sysml-indent-offset)
+     ((parent-is "requirement_body") parent-bol ,sysml-indent-offset)
+     ((parent-is "usage_body")       parent-bol ,sysml-indent-offset)
+     ((parent-is "state_body")       parent-bol ,sysml-indent-offset)
      (no-node parent-bol 0)))
-  "Indentation rules for `sysml-ts-mode'.")
+  "Indentation rules for `sysml-mode'.")
 
 ;;; Major mode
 
 ;;;###autoload
-(define-derived-mode sysml-ts-mode prog-mode "SysML[ts]"
+(define-derived-mode sysml-mode prog-mode "SysML[ts]"
   "Major mode for editing SysML v2 files, powered by tree-sitter.
 
 To install the grammar:
   M-x treesit-install-language-grammar RET sysml RET
 
-\\{sysml-ts-mode-map}"
-  :syntax-table sysml-ts-mode--syntax-table
+\\{sysml-mode-map}"
+  :syntax-table sysml-mode--syntax-table
   :group 'sysml
 
   (setq-local comment-start "// ")
@@ -164,16 +155,16 @@ To install the grammar:
 
   (when (treesit-ready-p 'sysml)
     (treesit-parser-create 'sysml)
-    (setq-local treesit-font-lock-settings sysml-ts-mode--font-lock-settings)
-    (setq-local treesit-font-lock-feature-list sysml-ts-mode--font-lock-feature-list)
-    (setq-local treesit-simple-indent-rules sysml-ts-mode--indent-rules)
+    (setq-local treesit-font-lock-settings sysml-mode--font-lock-settings)
+    (setq-local treesit-font-lock-feature-list sysml-mode--font-lock-feature-list)
+    (setq-local treesit-simple-indent-rules sysml-mode--indent-rules)
     (treesit-major-mode-setup)))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.sysml\\'" . sysml-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.sysml\\'" . sysml-mode))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.kerml\\'" . sysml-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.kerml\\'" . sysml-mode))
 
-(provide 'sysml-ts-mode)
-;;; sysml-ts-mode.el ends here
+(provide 'sysml-mode)
+;;; sysml-mode.el ends here

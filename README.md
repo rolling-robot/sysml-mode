@@ -1,4 +1,4 @@
-# sysml-ts-mode
+# sysml-mode
 
 Emacs major mode for [SysML v2](https://www.omgsysml.org/) (`.sysml`) and
 KerML (`.kerml`) files, powered by the
@@ -24,18 +24,18 @@ This requires `git` and a C compiler.
 
 ```elisp
 (add-to-list 'load-path "/path/to/sysml-mode")
-(require 'sysml-ts-mode)
+(require 'sysml-mode)
 ```
 
 #### MELPA (forthcoming)
 
 ```elisp
-(package-install 'sysml-ts-mode)
+(package-install 'sysml-mode)
 ```
 
 ## Usage
 
-Opening any `.sysml` or `.kerml` file automatically activates `sysml-ts-mode`.
+Opening any `.sysml` or `.kerml` file automatically activates `sysml-mode`.
 The mode requires the tree-sitter grammar to be installed; without it the buffer
 falls back to `prog-mode` behaviour.
 
