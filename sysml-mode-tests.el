@@ -177,5 +177,10 @@
       (sysml-mode--flymake-backend (lambda (diags &rest _) (setq reported diags)))
       (should (null reported)))))
 
+(ert-deftest sysml-mode-eglot-registered ()
+  "sysml-mode is registered in eglot-server-programs after loading eglot."
+  (require 'eglot)
+  (should (assq 'sysml-mode eglot-server-programs)))
+
 (provide 'sysml-mode-tests)
 ;;; sysml-mode-tests.el ends here

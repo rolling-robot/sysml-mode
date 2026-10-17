@@ -124,16 +124,16 @@
   :group 'sysml)
 
 (defconst sysml-mode--indent-rules
-  `((sysml
+  '((sysml
      ((parent-is "source_file") column-0 0)
      ((node-is "}") parent-bol 0)
-     ((parent-is "package_body")     parent-bol ,sysml-indent-offset)
-     ((parent-is "definition_body") parent-bol ,sysml-indent-offset)
-     ((parent-is "structural_body")  parent-bol ,sysml-indent-offset)
-     ((parent-is "action_body")      parent-bol ,sysml-indent-offset)
-     ((parent-is "requirement_body") parent-bol ,sysml-indent-offset)
-     ((parent-is "usage_body")       parent-bol ,sysml-indent-offset)
-     ((parent-is "state_body")       parent-bol ,sysml-indent-offset)
+     ((parent-is "package_body")     parent-bol sysml-indent-offset)
+     ((parent-is "definition_body") parent-bol sysml-indent-offset)
+     ((parent-is "structural_body")  parent-bol sysml-indent-offset)
+     ((parent-is "action_body")      parent-bol sysml-indent-offset)
+     ((parent-is "requirement_body") parent-bol sysml-indent-offset)
+     ((parent-is "usage_body")       parent-bol sysml-indent-offset)
+     ((parent-is "state_body")       parent-bol sysml-indent-offset)
      (no-node parent-bol 0)))
   "Indentation rules for `sysml-mode'.")
 
@@ -187,6 +187,20 @@ To install the grammar:
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.kerml\\'" . sysml-mode))
+
+;;; Eglot
+
+(defcustom sysml-lsp-server '("spec42" "lsp")
+  "Command to start the SysML language server.
+Each element is a string; the first is the executable, the rest are arguments."
+  :type '(repeat string)
+  :group 'sysml)
+
+(defvar eglot-server-programs)
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               (cons 'sysml-mode (lambda () sysml-lsp-server))))
 
 (provide 'sysml-mode)
 ;;; sysml-mode.el ends here
