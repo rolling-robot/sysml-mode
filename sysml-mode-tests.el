@@ -156,6 +156,49 @@
     (forward-line 1)
     (should (= (current-indentation) sysml-indent-offset))))
 
+(ert-deftest sysml-mode-indent-whitespace-settings ()
+  "Indentation uses spaces and `tab-width' follows `sysml-indent-offset'."
+  (with-temp-buffer
+    (let ((sysml-indent-offset 3))
+      (sysml-mode)
+      (should-not indent-tabs-mode)
+      (should (= tab-width 3)))))
+
+(ert-deftest sysml-mode-indent-no-tabs ()
+  "Deeply nested lines are indented with spaces only."
+  (skip-unless (treesit-ready-p 'sysml t))
+  (with-temp-buffer
+    (insert "package A {\npackage B {\npackage C {\npart x;\n}\n}\n}\n")
+    (sysml-mode)
+    (indent-region (point-min) (point-max))
+    (should-not (string-search "\t" (buffer-string)))))
+
+(ert-deftest sysml-mode-eglot-format-matches-indent ()
+  "LSP formatting agrees with tree-sitter indentation."
+  (skip-unless (and (treesit-ready-p 'sysml t)
+                    (executable-find (car sysml-lsp-server))))
+  (require 'eglot)
+  (let* ((source "package P {\npart def A {\nattribute x : Real;\n}\n}\n")
+         (file (make-temp-file "sysml-test" nil ".sysml" source))
+         (buffer (find-file-noselect file))
+         (eglot-autoshutdown t))
+    (unwind-protect
+        (with-current-buffer buffer
+          (let ((expected (save-excursion
+                            (indent-region (point-min) (point-max))
+                            (prog1 (buffer-string)
+                              (erase-buffer)
+                              (insert source)))))
+            (apply #'eglot (eglot--guess-contact))
+            (eglot-format-buffer)
+            (should (equal (buffer-string) expected))))
+      (with-current-buffer buffer
+        (when (eglot-current-server)
+          (eglot-shutdown (eglot-current-server)))
+        (set-buffer-modified-p nil))
+      (kill-buffer buffer)
+      (delete-file file))))
+
 (ert-deftest sysml-mode-flymake-syntax-error ()
   "Flymake backend reports a diagnostic for an ERROR node."
   (skip-unless (treesit-ready-p 'sysml t))

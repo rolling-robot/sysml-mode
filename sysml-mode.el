@@ -174,6 +174,11 @@ To install the grammar:
   (setq-local comment-start-skip "\\(?://+\\|/\\*+\\)\\s-*")
   (setq-local comment-multi-line t)
 
+  ;; Eglot derives LSP formatting options from these, so keep them
+  ;; consistent with `sysml-indent-offset'.
+  (setq-local indent-tabs-mode nil)
+  (setq-local tab-width sysml-indent-offset)
+
   (when (treesit-ready-p 'sysml)
     (treesit-parser-create 'sysml)
     (setq-local treesit-font-lock-settings sysml-mode--font-lock-settings)
