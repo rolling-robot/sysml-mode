@@ -27,6 +27,25 @@ This requires `git` and a C compiler.
 (require 'sysml-mode)
 ```
 
+#### Elpaca
+
+With Elpaca's `use-package` integration enabled:
+
+```elisp
+(use-package sysml-mode
+  :ensure (:host github :repo "rolling-robot/sysml-mode"))
+```
+
+Without `use-package`:
+
+```elisp
+(elpaca (sysml-mode :host github :repo "rolling-robot/sysml-mode"))
+```
+
+Elpaca installs packages asynchronously, so run
+`M-x treesit-install-language-grammar RET sysml RET` once it has finished
+loading.
+
 #### MELPA (forthcoming)
 
 ```elisp
