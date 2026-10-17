@@ -54,14 +54,12 @@ sysml-lsp -version
 
 ### Start Eglot
 
-```
-M-x eglot
-```
-
-To start Eglot automatically when opening SysML files:
+Eglot starts automatically when a SysML file is opened and the
+`sysml-lsp-server` executable is found on `exec-path`. To disable that and
+start it manually with `M-x eglot`:
 
 ```elisp
-(add-hook 'sysml-mode-hook #'eglot-ensure)
+(setq sysml-eglot-auto-start nil)
 ```
 
 ### Custom server

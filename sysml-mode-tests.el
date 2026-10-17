@@ -231,5 +231,32 @@
   (let ((contact (cdr (assq 'sysml-mode eglot-server-programs))))
     (should (equal (funcall contact t nil) sysml-lsp-server))))
 
+(defun sysml-mode-tests--eglot-ensure-called-p (server auto-start)
+  "Return non-nil if enabling `sysml-mode' calls `eglot-ensure'.
+SERVER is bound to `sysml-lsp-server', AUTO-START to
+`sysml-eglot-auto-start'."
+  (let ((sysml-lsp-server server)
+        (sysml-eglot-auto-start auto-start)
+        called)
+    (cl-letf (((symbol-function 'eglot-ensure)
+               (lambda () (setq called t))))
+      (with-temp-buffer
+        (sysml-mode)))
+    called))
+
+(ert-deftest sysml-mode-eglot-auto-start-when-server-found ()
+  "Eglot starts when the server executable is on `exec-path'."
+  (should (sysml-mode-tests--eglot-ensure-called-p '("sh") t)))
+
+(ert-deftest sysml-mode-eglot-no-auto-start-when-server-missing ()
+  "Eglot does not start when the server executable is not found."
+  (should-not (sysml-mode-tests--eglot-ensure-called-p
+               '("sysml-mode-tests-no-such-server") t))
+  (should-not (sysml-mode-tests--eglot-ensure-called-p nil t)))
+
+(ert-deftest sysml-mode-eglot-no-auto-start-when-disabled ()
+  "Eglot does not start when `sysml-eglot-auto-start' is nil."
+  (should-not (sysml-mode-tests--eglot-ensure-called-p '("sh") nil)))
+
 (provide 'sysml-mode-tests)
 ;;; sysml-mode-tests.el ends here

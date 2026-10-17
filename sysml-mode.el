@@ -185,7 +185,9 @@ To install the grammar:
     (setq-local treesit-font-lock-feature-list sysml-mode--font-lock-feature-list)
     (setq-local treesit-simple-indent-rules sysml-mode--indent-rules)
     (treesit-major-mode-setup)
-    (add-hook 'flymake-diagnostic-functions #'sysml-mode--flymake-backend nil t)))
+    (add-hook 'flymake-diagnostic-functions #'sysml-mode--flymake-backend nil t))
+
+  (sysml-mode--maybe-start-eglot))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.sysml\\'" . sysml-mode))
@@ -202,7 +204,28 @@ The default is the OpenSysML server, looked up on `exec-path'."
   :type '(repeat string)
   :group 'sysml)
 
+(defcustom sysml-eglot-auto-start t
+  "Whether `sysml-mode' starts Eglot when the language server is installed.
+When non-nil and the executable named by `sysml-lsp-server' is found,
+visiting a SysML file calls `eglot-ensure'."
+  :type 'boolean
+  :group 'sysml)
+
 (defvar eglot-server-programs)
+
+(declare-function eglot-ensure "eglot" ())
+
+(defun sysml-mode--lsp-server-available-p ()
+  "Return non-nil if the executable of `sysml-lsp-server' is found.
+For a remote buffer the executable is looked up on the remote host."
+  (when-let* ((program (car sysml-lsp-server)))
+    (executable-find program (file-remote-p default-directory))))
+
+(defun sysml-mode--maybe-start-eglot ()
+  "Start Eglot if `sysml-eglot-auto-start' is set and the server is found."
+  (when (and sysml-eglot-auto-start
+             (sysml-mode--lsp-server-available-p))
+    (eglot-ensure)))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
