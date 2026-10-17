@@ -190,9 +190,10 @@ To install the grammar:
 
 ;;; Eglot
 
-(defcustom sysml-lsp-server '("spec42" "lsp")
+(defcustom sysml-lsp-server '("sysml-lsp")
   "Command to start the SysML language server.
-Each element is a string; the first is the executable, the rest are arguments."
+Each element is a string; the first is the executable, the rest are arguments.
+The default is the OpenSysML server, looked up on `exec-path'."
   :type '(repeat string)
   :group 'sysml)
 
@@ -200,7 +201,7 @@ Each element is a string; the first is the executable, the rest are arguments."
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
-               (cons 'sysml-mode (lambda () sysml-lsp-server))))
+               (cons 'sysml-mode (lambda (&rest _) sysml-lsp-server))))
 
 (provide 'sysml-mode)
 ;;; sysml-mode.el ends here

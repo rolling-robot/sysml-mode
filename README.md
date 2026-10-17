@@ -35,23 +35,21 @@ This requires `git` and a C compiler.
 
 ## LSP support (Eglot)
 
-`sysml-mode` registers the [spec42](https://github.com/elan8/spec42)
-language server automatically when Eglot is loaded.
+`sysml-mode` registers the [OpenSysML](https://github.com/Open-MBEE/OpenSysML)
+language server (`sysml-lsp`) automatically when Eglot is loaded.
 
-### Install spec42
+### Install sysml-lsp
 
-Download the latest release for your platform and place the `spec42` binary on
-your PATH:
+Install with Go; the binary lands in `~/go/bin`, which must be on your PATH:
 
 ```sh
-curl -L https://github.com/elan8/spec42/releases/download/v0.32.0/spec42-0.32.0-linux-x64.tar.gz \
-  | tar -xz -C ~/.local/bin
+go install github.com/Open-MBEE/OpenSysML/cmd/sysml-lsp@latest
 ```
 
 Verify the installation:
 
 ```sh
-spec42 doctor
+sysml-lsp -version
 ```
 
 ### Start Eglot
@@ -66,12 +64,15 @@ To start Eglot automatically when opening SysML files:
 (add-hook 'sysml-mode-hook #'eglot-ensure)
 ```
 
-### Custom server path
+### Custom server
 
-If `spec42` is not on your PATH, set `sysml-lsp-server` before Eglot connects:
+If `sysml-lsp` is not on your PATH, or to use another server such as
+[spec42](https://github.com/elan8/spec42), set `sysml-lsp-server` before Eglot
+connects:
 
 ```elisp
-(setq sysml-lsp-server '("/path/to/spec42" "lsp"))
+(setq sysml-lsp-server (list (expand-file-name "~/go/bin/sysml-lsp")))
+(setq sysml-lsp-server '("spec42" "lsp"))
 ```
 
 ## Usage

@@ -182,5 +182,11 @@
   (require 'eglot)
   (should (assq 'sysml-mode eglot-server-programs)))
 
+(ert-deftest sysml-mode-eglot-contact ()
+  "Eglot server contact resolves to `sysml-lsp-server'."
+  (require 'eglot)
+  (let ((contact (cdr (assq 'sysml-mode eglot-server-programs))))
+    (should (equal (funcall contact t nil) sysml-lsp-server))))
+
 (provide 'sysml-mode-tests)
 ;;; sysml-mode-tests.el ends here
